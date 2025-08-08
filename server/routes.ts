@@ -17,20 +17,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
 
-  // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      res.json(user);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
+  // Development bypass middleware
+  const devAuth = process.env.NODE_ENV === 'development' 
+    ? (req: any, res: any, next: any) => next()
+    : isAuthenticated;
+
+  // Auth routes  
+  app.get('/api/auth/user', async (req: any, res) => {
+    if (process.env.NODE_ENV === 'development') {
+      // Development mode: Create a mock authenticated user
+      try {
+        const mockUser = {
+          id: "dev-user-123",
+          email: "dev@example.com",
+          firstName: "Dev",
+          lastName: "User",
+          role: "admin",
+          profileImageUrl: null,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        };
+        
+        // Ensure the user exists in the database
+        try {
+          await storage.upsertUser(mockUser);
+        } catch (error) {
+          // Ignore if already exists
+        }
+        
+        return res.json(mockUser);
+      } catch (error) {
+        console.error("Error creating mock user:", error);
+        return res.status(500).json({ message: "Failed to create mock user" });
+      }
     }
+    
+    // Production mode: Use authentication
+    return isAuthenticated(req, res, async () => {
+      try {
+        const userId = process.env.NODE_ENV === "development" ? "dev-user-123" : req.user.claims.sub;
+        const user = await storage.getUser(userId);
+        res.json(user);
+      } catch (error) {
+        console.error("Error fetching user:", error);
+        res.status(500).json({ message: "Failed to fetch user" });
+      }
+    });
   });
 
   // Portfolio routes
-  app.get('/api/portfolios', isAuthenticated, async (req, res) => {
+  app.get('/api/portfolios', devAuth, async (req, res) => {
     try {
       const portfolios = await storage.getPortfolios();
       res.json(portfolios);
@@ -40,7 +76,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/portfolios/:id', isAuthenticated, async (req, res) => {
+  app.get('/api/portfolios/:id', devAuth, async (req, res) => {
     try {
       const portfolio = await storage.getPortfolio(req.params.id);
       if (!portfolio) {
@@ -53,9 +89,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/portfolios', isAuthenticated, async (req: any, res) => {
+  app.post('/api/portfolios', devAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = process.env.NODE_ENV === 'development' ? "dev-user-123" : req.user.claims.sub;
       const portfolioData = insertPortfolioSchema.parse({
         ...req.body,
         ownerId: userId
@@ -81,9 +117,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/portfolios/:id', isAuthenticated, async (req: any, res) => {
+  app.put('/api/portfolios/:id', devAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = process.env.NODE_ENV === "development" ? "dev-user-123" : req.user.claims.sub;
       const portfolioData = insertPortfolioSchema.partial().parse(req.body);
       const portfolio = await storage.updatePortfolio(req.params.id, portfolioData);
       
@@ -106,9 +142,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/portfolios/:id', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/portfolios/:id', devAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = process.env.NODE_ENV === "development" ? "dev-user-123" : req.user.claims.sub;
       await storage.deletePortfolio(req.params.id);
       
       // Create audit log
@@ -128,7 +164,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Program routes
-  app.get('/api/programs', isAuthenticated, async (req, res) => {
+  app.get('/api/programs', devAuth, async (req, res) => {
     try {
       const portfolioId = req.query.portfolioId as string;
       const programs = await storage.getPrograms(portfolioId);
@@ -139,9 +175,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/programs', isAuthenticated, async (req: any, res) => {
+  app.post('/api/programs', devAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = process.env.NODE_ENV === "development" ? "dev-user-123" : req.user.claims.sub;
       const programData = insertProgramSchema.parse({
         ...req.body,
         ownerId: userId
@@ -167,7 +203,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Demand routes
-  app.get('/api/demands', isAuthenticated, async (req, res) => {
+  app.get('/api/demands', devAuth, async (req, res) => {
     try {
       const programId = req.query.programId as string;
       const demands = await storage.getDemands(programId);
@@ -178,9 +214,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/demands', isAuthenticated, async (req: any, res) => {
+  app.post('/api/demands', devAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = process.env.NODE_ENV === "development" ? "dev-user-123" : req.user.claims.sub;
       const demandData = insertDemandSchema.parse({
         ...req.body,
         ownerId: userId
@@ -206,7 +242,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Project routes
-  app.get('/api/projects', isAuthenticated, async (req, res) => {
+  app.get('/api/projects', devAuth, async (req, res) => {
     try {
       const programId = req.query.programId as string;
       const projects = await storage.getProjects(programId);
@@ -217,7 +253,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/projects/:id', isAuthenticated, async (req, res) => {
+  app.get('/api/projects/:id', devAuth, async (req, res) => {
     try {
       const project = await storage.getProject(req.params.id);
       if (!project) {
@@ -230,9 +266,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/projects', isAuthenticated, async (req: any, res) => {
+  app.post('/api/projects', devAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = process.env.NODE_ENV === "development" ? "dev-user-123" : req.user.claims.sub;
       const projectData = insertProjectSchema.parse({
         ...req.body,
         ownerId: userId
@@ -257,9 +293,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/projects/:id', isAuthenticated, async (req: any, res) => {
+  app.put('/api/projects/:id', devAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = process.env.NODE_ENV === "development" ? "dev-user-123" : req.user.claims.sub;
       const projectData = insertProjectSchema.partial().parse(req.body);
       const project = await storage.updateProject(req.params.id, projectData);
       
@@ -282,7 +318,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Phase routes
-  app.get('/api/phases', isAuthenticated, async (req, res) => {
+  app.get('/api/phases', devAuth, async (req, res) => {
     try {
       const type = req.query.type as string;
       const phases = await storage.getPhases(type);
@@ -293,9 +329,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/phases', isAuthenticated, async (req: any, res) => {
+  app.post('/api/phases', devAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = process.env.NODE_ENV === "development" ? "dev-user-123" : req.user.claims.sub;
       const phaseData = insertPhaseSchema.parse(req.body);
       const phase = await storage.createPhase(phaseData);
       res.status(201).json(phase);
@@ -309,7 +345,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Status routes
-  app.get('/api/statuses', isAuthenticated, async (req, res) => {
+  app.get('/api/statuses', devAuth, async (req, res) => {
     try {
       const type = req.query.type as string;
       const statuses = await storage.getStatuses(type);
@@ -320,9 +356,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/statuses', isAuthenticated, async (req: any, res) => {
+  app.post('/api/statuses', devAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = process.env.NODE_ENV === "development" ? "dev-user-123" : req.user.claims.sub;
       const statusData = insertStatusSchema.parse(req.body);
       const status = await storage.createStatus(statusData);
       res.status(201).json(status);
@@ -336,7 +372,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Dashboard metrics
-  app.get('/api/dashboard/metrics', isAuthenticated, async (req, res) => {
+  app.get('/api/dashboard/metrics', devAuth, async (req, res) => {
     try {
       const metrics = await storage.getDashboardMetrics();
       res.json(metrics);
@@ -347,7 +383,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // User search
-  app.get('/api/users/search', isAuthenticated, async (req, res) => {
+  app.get('/api/users/search', devAuth, async (req, res) => {
     try {
       const query = req.query.q as string;
       if (!query) {
@@ -362,7 +398,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Audit log routes
-  app.get('/api/audit', isAuthenticated, async (req, res) => {
+  app.get('/api/audit', devAuth, async (req, res) => {
     try {
       const entityId = req.query.entityId as string;
       const entityType = req.query.entityType as string;
@@ -375,7 +411,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Seed data initialization
-  app.post('/api/seed-data', isAuthenticated, async (req: any, res) => {
+  app.post('/api/seed-data', devAuth, async (req: any, res) => {
     try {
       // Add default phases for demands
       const demandPhases = [
