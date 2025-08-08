@@ -315,7 +315,7 @@ export default function Demands() {
       header: "Requested",
       render: (demand: ExtendedDemand) => (
         <span className="text-sm text-slate-500" data-testid={`text-requested-${demand.id}`}>
-          {formatDate(demand.requestedDate)}
+          {demand.requestedDate ? formatDate(demand.requestedDate) : "N/A"}
         </span>
       ),
     },

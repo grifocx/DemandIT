@@ -272,7 +272,7 @@ export default function Programs() {
       header: "Created",
       render: (program: ExtendedProgram) => (
         <span className="text-sm text-slate-500" data-testid={`text-created-${program.id}`}>
-          {formatDate(program.createdAt)}
+          {program.createdAt ? formatDate(program.createdAt) : "N/A"}
         </span>
       ),
     },

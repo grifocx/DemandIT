@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { storage } from "./storage";
 
 const app = express();
 app.use(express.json());
@@ -36,8 +37,86 @@ app.use((req, res, next) => {
   next();
 });
 
+async function initializeDefaultData() {
+  try {
+    // Initialize default phases for demands
+    const demandPhases = [
+      { name: 'Idea', type: 'demand', order: 1 },
+      { name: 'Analysis', type: 'demand', order: 2 },
+      { name: 'Approved', type: 'demand', order: 3 },
+      { name: 'Rejected', type: 'demand', order: 4 }
+    ];
+    
+    for (const phase of demandPhases) {
+      try {
+        await storage.createPhase(phase);
+      } catch (error) {
+        // Ignore if already exists
+      }
+    }
+    
+    // Initialize default statuses for demands  
+    const demandStatuses = [
+      { name: 'Pending', type: 'demand', color: 'yellow' },
+      { name: 'Under Review', type: 'demand', color: 'blue' },
+      { name: 'Approved', type: 'demand', color: 'green' },
+      { name: 'Rejected', type: 'demand', color: 'red' },
+      { name: 'On Hold', type: 'demand', color: 'orange' }
+    ];
+    
+    for (const status of demandStatuses) {
+      try {
+        await storage.createStatus(status);
+      } catch (error) {
+        // Ignore if already exists
+      }
+    }
+
+    // Initialize default phases for projects
+    const projectPhases = [
+      { name: 'Planning', type: 'project', order: 1 },
+      { name: 'Development', type: 'project', order: 2 },
+      { name: 'Testing', type: 'project', order: 3 },
+      { name: 'Deployment', type: 'project', order: 4 },
+      { name: 'Complete', type: 'project', order: 5 }
+    ];
+    
+    for (const phase of projectPhases) {
+      try {
+        await storage.createPhase(phase);
+      } catch (error) {
+        // Ignore if already exists
+      }
+    }
+    
+    // Initialize default statuses for projects
+    const projectStatuses = [
+      { name: 'Active', type: 'project', color: 'green' },
+      { name: 'On Hold', type: 'project', color: 'yellow' },
+      { name: 'At Risk', type: 'project', color: 'red' },
+      { name: 'Completed', type: 'project', color: 'blue' },
+      { name: 'Cancelled', type: 'project', color: 'gray' }
+    ];
+    
+    for (const status of projectStatuses) {
+      try {
+        await storage.createStatus(status);
+      } catch (error) {
+        // Ignore if already exists
+      }
+    }
+
+    log('Default phases and statuses initialized successfully');
+  } catch (error) {
+    console.error('Error initializing default data:', error);
+  }
+}
+
 (async () => {
   const server = await registerRoutes(app);
+
+  // Initialize default data on startup
+  await initializeDefaultData();
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;

@@ -197,7 +197,7 @@ export default function Dashboard() {
       header: "Due Date",
       render: (project: ExtendedProject) => (
         <span className="text-sm text-slate-500">
-          {formatDate(project.endDate)}
+          {project.endDate ? formatDate(project.endDate) : "N/A"}
         </span>
       ),
     },
