@@ -330,7 +330,7 @@ export default function Portfolios() {
       header: "Created",
       render: (portfolio: ExtendedPortfolio) => (
         <span className="text-sm text-slate-500" data-testid={`text-created-${portfolio.id}`}>
-          {portfolio.createdAt ? formatDate(portfolio.createdAt) : "N/A"}
+          {portfolio.createdAt ? formatDate(String(portfolio.createdAt)) : "N/A"}
         </span>
       ),
     },
