@@ -214,7 +214,7 @@ export function ProjectTable() {
             className={`text-sm ${isOverdue ? "text-red-600" : "text-slate-500"}`}
             data-testid={`text-due-date-${project.id}`}
           >
-            {project.endDate ? formatDate(project.endDate) : "N/A"}
+            {project.endDate ? formatDate(String(project.endDate)) : "N/A"}
           </span>
         )
       },

@@ -64,7 +64,7 @@ export function DataTable<T extends Record<string, any>>({
         )
       : true
     
-    const matchesFilter = filterable && filter
+    const matchesFilter = filterable && filter && filter !== "all"
       ? item.status?.toLowerCase() === filter.toLowerCase() ||
         item.type?.toLowerCase() === filter.toLowerCase()
       : true
@@ -109,8 +109,8 @@ export function DataTable<T extends Record<string, any>>({
                   <SelectValue placeholder="All Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Status</SelectItem>
-                  {filterOptions.map((option) => (
+                  <SelectItem value="all">All Status</SelectItem>
+                  {filterOptions.filter(option => option.value && option.value.trim() !== "").map((option) => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
                     </SelectItem>
