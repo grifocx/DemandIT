@@ -293,6 +293,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post('/api/phases', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const phaseData = insertPhaseSchema.parse(req.body);
+      const phase = await storage.createPhase(phaseData);
+      res.status(201).json(phase);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      console.error("Error creating phase:", error);
+      res.status(500).json({ message: "Failed to create phase" });
+    }
+  });
+
   // Status routes
   app.get('/api/statuses', isAuthenticated, async (req, res) => {
     try {
@@ -302,6 +317,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching statuses:", error);
       res.status(500).json({ message: "Failed to fetch statuses" });
+    }
+  });
+
+  app.post('/api/statuses', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const statusData = insertStatusSchema.parse(req.body);
+      const status = await storage.createStatus(statusData);
+      res.status(201).json(status);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      console.error("Error creating status:", error);
+      res.status(500).json({ message: "Failed to create status" });
     }
   });
 
@@ -341,6 +371,83 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching audit logs:", error);
       res.status(500).json({ message: "Failed to fetch audit logs" });
+    }
+  });
+
+  // Seed data initialization
+  app.post('/api/seed-data', isAuthenticated, async (req: any, res) => {
+    try {
+      // Add default phases for demands
+      const demandPhases = [
+        { name: 'Idea', type: 'demand', order: 1 },
+        { name: 'Analysis', type: 'demand', order: 2 },
+        { name: 'Approved', type: 'demand', order: 3 },
+        { name: 'Rejected', type: 'demand', order: 4 }
+      ];
+      
+      for (const phase of demandPhases) {
+        try {
+          await storage.createPhase(phase);
+        } catch (error) {
+          // Ignore if already exists
+        }
+      }
+      
+      // Add default statuses for demands  
+      const demandStatuses = [
+        { name: 'Pending', type: 'demand', color: 'yellow' },
+        { name: 'Under Review', type: 'demand', color: 'blue' },
+        { name: 'Approved', type: 'demand', color: 'green' },
+        { name: 'Rejected', type: 'demand', color: 'red' },
+        { name: 'On Hold', type: 'demand', color: 'orange' }
+      ];
+      
+      for (const status of demandStatuses) {
+        try {
+          await storage.createStatus(status);
+        } catch (error) {
+          // Ignore if already exists
+        }
+      }
+
+      // Add default phases for projects
+      const projectPhases = [
+        { name: 'Planning', type: 'project', order: 1 },
+        { name: 'Development', type: 'project', order: 2 },
+        { name: 'Testing', type: 'project', order: 3 },
+        { name: 'Deployment', type: 'project', order: 4 },
+        { name: 'Complete', type: 'project', order: 5 }
+      ];
+      
+      for (const phase of projectPhases) {
+        try {
+          await storage.createPhase(phase);
+        } catch (error) {
+          // Ignore if already exists
+        }
+      }
+      
+      // Add default statuses for projects
+      const projectStatuses = [
+        { name: 'Active', type: 'project', color: 'green' },
+        { name: 'On Hold', type: 'project', color: 'yellow' },
+        { name: 'At Risk', type: 'project', color: 'red' },
+        { name: 'Completed', type: 'project', color: 'blue' },
+        { name: 'Cancelled', type: 'project', color: 'gray' }
+      ];
+      
+      for (const status of projectStatuses) {
+        try {
+          await storage.createStatus(status);
+        } catch (error) {
+          // Ignore if already exists
+        }
+      }
+
+      res.json({ message: "Seed data initialized successfully" });
+    } catch (error) {
+      console.error("Error initializing seed data:", error);
+      res.status(500).json({ message: "Failed to initialize seed data" });
     }
   });
 
