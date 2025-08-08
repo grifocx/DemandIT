@@ -506,7 +506,7 @@ export default function Demands() {
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                  {programs.map((program) => (
+                                  {programs.filter(program => program.id && program.id.trim() !== "").map((program) => (
                                     <SelectItem key={program.id} value={program.id}>
                                       {program.name}
                                     </SelectItem>
@@ -533,7 +533,7 @@ export default function Demands() {
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                  {demandPhases.map((phase) => (
+                                  {demandPhases.filter(phase => phase.id && phase.id.trim() !== "").map((phase) => (
                                     <SelectItem key={phase.id} value={phase.id}>
                                       {phase.name}
                                     </SelectItem>
@@ -558,7 +558,7 @@ export default function Demands() {
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                  {demandStatuses.map((status) => (
+                                  {demandStatuses.filter(status => status.id && status.id.trim() !== "").map((status) => (
                                     <SelectItem key={status.id} value={status.id}>
                                       {status.name}
                                     </SelectItem>

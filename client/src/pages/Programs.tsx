@@ -388,7 +388,7 @@ export default function Programs() {
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                  {portfolios.map((portfolio) => (
+                                  {portfolios.filter(portfolio => portfolio.id && portfolio.id.trim() !== "").map((portfolio) => (
                                     <SelectItem key={portfolio.id} value={portfolio.id}>
                                       {portfolio.name}
                                     </SelectItem>
