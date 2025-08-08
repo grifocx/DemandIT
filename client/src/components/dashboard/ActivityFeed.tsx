@@ -35,7 +35,7 @@ export function ActivityFeed() {
         icon = ChartScatter
         iconColor = "bg-blue-100 text-blue-600"
         if (log.changeType === "created") {
-          description = `New project "${log.details?.project?.title || 'Unknown'}" created`
+          description = `New project created`
         } else if (log.changeType === "status_changed") {
           description = `Project status updated`
         }
@@ -44,7 +44,7 @@ export function ActivityFeed() {
         icon = Lightbulb
         iconColor = "bg-green-100 text-green-600"
         if (log.changeType === "created") {
-          description = `New demand "${log.details?.demand?.title || 'Unknown'}" submitted`
+          description = `New demand submitted`
         }
         break
       case "portfolio":
@@ -60,7 +60,7 @@ export function ActivityFeed() {
       id: log.id,
       type: log.entityType as Activity["type"],
       description,
-      timestamp: log.timestamp,
+      timestamp: log.timestamp ? new Date(log.timestamp).toISOString() : new Date().toISOString(),
       icon,
       iconColor,
     }

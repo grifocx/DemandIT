@@ -1,0 +1,76 @@
+1. Core Features You’ve Described
+From what you’ve outlined, the app needs to handle:
+Entities
+Portfolios → contain Programs
+Programs → contain Demands & Projects
+Demands → ideas or requests; can convert into Projects
+Projects → initiatives with phases, statuses, PM, etc.
+Relationships
+Portfolio → Program → Project
+Demand ↔ Project (linked when a demand becomes a project)
+Lifecycle
+Demands & Projects go through defined phases (e.g., Idea → Analysis → Delivery) and statuses (Active, On Hold, Completed, Cancelled).
+Roles & Permissions
+Users can be:
+Admin
+Portfolio Manager
+Program Manager
+Project Manager
+Contributor / Viewer
+Assignments
+Work items (demands/projects) have:
+Owner
+Project Manager
+Team members
+Basic tracking
+Status changes
+Simple metrics (dates, effort, cost — maybe later)
+2. Suggested Data Model (high-level)
+A minimal but flexible relational model could look like this:
+Tables
+
+Users: id, name, email, role(s)
+Portfolios: id, name, description, owner_id
+Programs: id, name, description, portfolio_id, owner_id
+Demands: id, title, description, program_id, phase, status, owner_id, requested_date
+Projects: id, title, description, program_id, demand_id (nullable), phase, status, pm_id, start_date, end_date
+Phases: id, name, type (demand/project)
+Statuses: id, name, type (demand/project)
+Assignments: id, project_id, user_id, role
+Audit Log (optional but useful): id, entity_type, entity_id, change_type, changed_by, timestamp, details
+Key relationships:
+Portfolio → Program → Demand/Project (one-to-many)
+Demand → Project (one-to-one or many-to-one if multiple projects per demand)
+Users link to entities via owner/PM or assignments.
+3. Tech Stack Options
+Depends on your team’s comfort level:
+Option A: Fastest MVP (Low-Code/No-Code)
+Frontend/Backend: Retool, Appsmith, or Budibase (internal tools)
+Database: PostgreSQL
+Auth: Built-in or Auth0
+Pros: Weeks not months; easy to iterate
+Cons: Less customization in UI/UX
+Option B: Full Custom Web App
+Frontend: React (Next.js) or Vue (Nuxt.js)
+Backend: Node.js (Express, NestJS) or Python (Django, FastAPI)
+Database: PostgreSQL or MySQL
+Auth: Auth0, Supabase Auth, or custom JWT
+Pros: Maximum flexibility; easier to integrate with other systems
+Cons: More dev time & maintenance
+Option C: Hybrid
+Backend API + Admin UI in low-code tool, custom UI for end users.
+4. Implementation Roadmap
+Phase 1 (MVP) — Core entities & CRUD
+User authentication & role-based access
+Create/view/edit portfolios, programs, demands, projects
+Phase & status management
+Owner/PM assignment
+Basic reporting list views
+Phase 2 — Usability & Tracking
+Search & filtering
+Audit log for changes
+Dashboard widgets (active projects, demands by status)
+Phase 3 — Nice-to-have features
+File attachments
+Comments & collaboration
+Basic Gantt chart view for projects

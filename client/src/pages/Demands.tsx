@@ -36,6 +36,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { apiRequest } from "@/lib/queryClient"
 import { isUnauthorizedError } from "@/lib/authUtils"
+import { formatDate } from "@/lib/utils"
 import { Lightbulb, Plus, Eye, Edit, ArrowRight } from "lucide-react"
 import type { Demand, Program, Portfolio, Phase, Status, User } from "@shared/schema"
 

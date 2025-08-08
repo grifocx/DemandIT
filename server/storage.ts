@@ -310,17 +310,21 @@ export class DatabaseStorage implements IStorage {
 
   // Audit log operations
   async getAuditLogs(entityId?: string, entityType?: string): Promise<AuditLog[]> {
-    let query = db.select().from(auditLog);
-    
     if (entityId && entityType) {
-      query = query.where(and(eq(auditLog.entityId, entityId), eq(auditLog.entityType, entityType)));
+      return await db.select().from(auditLog)
+        .where(and(eq(auditLog.entityId, entityId), eq(auditLog.entityType, entityType)))
+        .orderBy(desc(auditLog.timestamp));
     } else if (entityId) {
-      query = query.where(eq(auditLog.entityId, entityId));
+      return await db.select().from(auditLog)
+        .where(eq(auditLog.entityId, entityId))
+        .orderBy(desc(auditLog.timestamp));
     } else if (entityType) {
-      query = query.where(eq(auditLog.entityType, entityType));
+      return await db.select().from(auditLog)
+        .where(eq(auditLog.entityType, entityType))
+        .orderBy(desc(auditLog.timestamp));
     }
     
-    return await query.orderBy(desc(auditLog.timestamp));
+    return await db.select().from(auditLog).orderBy(desc(auditLog.timestamp));
   }
 
   async createAuditLog(auditLogData: InsertAuditLog): Promise<AuditLog> {

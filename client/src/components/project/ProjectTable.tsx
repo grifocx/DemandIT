@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ProjectModal } from "./ProjectModal"
 import { useToast } from "@/hooks/use-toast"
 import { isUnauthorizedError } from "@/lib/authUtils"
+import { formatDate } from "@/lib/utils"
 import { Eye, Edit, ChartScatter, Calendar, DollarSign } from "lucide-react"
 import type { Project, User, Phase, Status, Program } from "@shared/schema"
 
