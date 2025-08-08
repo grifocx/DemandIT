@@ -7,6 +7,7 @@ The application follows a full-stack architecture with a React frontend, Express
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
+Product branding: "Demand-IT" (updated January 2025)
 
 # System Architecture
 
@@ -78,3 +79,23 @@ The system implements a hierarchical data model:
 - **nanoid**: Unique ID generation for various purposes
 - **memoizee**: Function memoization for performance optimization
 - **zod**: Runtime type validation and schema definition
+
+# Testing & Quality Assurance
+
+## Test Plan
+A comprehensive test plan is available in `TEST_PLAN.md` covering all current functionality:
+- Authentication and authorization flows
+- Complete CRUD operations for all entities (Portfolios, Programs, Demands, Projects)
+- Data relationships and hierarchy validation
+- UI/UX testing including responsive design
+- Error handling and form validation
+- Role-based access control testing
+- Performance and browser compatibility testing
+
+The test plan includes 12 major test categories with detailed test cases, expected results, and success criteria for ensuring all features work correctly before deployment or major releases.
+
+# Recent Changes
+
+## January 2025
+- **Branding Update**: Changed product name from "IT Portfolio Manager" to "Demand-IT" across all UI components, navigation, landing page, and documentation
+- **Test Plan Creation**: Comprehensive test plan document created covering all existing functionality for quality assurance
