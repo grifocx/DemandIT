@@ -1,6 +1,6 @@
 # Overview
 
-This is an IT Portfolio Management application designed to provide a lightweight alternative to complex enterprise SPM (Strategic Portfolio Management) tools like ServiceNow. The system manages the complete hierarchy of IT investments from portfolios down to individual projects, with demand pipeline management and role-based access control.
+Demand-IT is a strategic portfolio management application designed to provide a lightweight alternative to complex enterprise SPM (Strategic Portfolio Management) tools like ServiceNow. The system manages the complete hierarchy of IT investments from portfolios down to individual projects, with demand pipeline management and role-based access control.
 
 The application follows a full-stack architecture with a React frontend, Express.js backend, and PostgreSQL database using Drizzle ORM. It provides comprehensive portfolio oversight, program management, demand tracking, and project execution capabilities with built-in authentication via Replit's OIDC system.
 

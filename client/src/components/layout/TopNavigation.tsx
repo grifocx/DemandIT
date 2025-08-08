@@ -35,7 +35,7 @@ export function TopNavigation() {
           <div className="flex items-center">
             <div className="flex-shrink-0">
               <h1 className="text-xl font-bold text-white" data-testid="text-app-title">
-                IT Portfolio Manager
+                Demand-IT
               </h1>
             </div>
           </div>

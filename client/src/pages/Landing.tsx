@@ -64,7 +64,7 @@ export default function Landing() {
                 className="text-xl font-bold text-slate-900"
                 data-testid="text-landing-title"
               >
-                Demand-IT Portfolio Manager
+                Demand-IT
               </h1>
             </div>
             <Button onClick={handleLogin} data-testid="button-login">
