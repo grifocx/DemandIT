@@ -12,6 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Settings, Plus, Edit2, Trash2, CheckCircle, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
+import { Sidebar } from "@/components/layout/Sidebar";
+import { TopNavigation } from "@/components/layout/TopNavigation";
 
 export default function Workflow() {
   const [activeTab, setActiveTab] = useState("phases");
@@ -164,13 +166,18 @@ export default function Workflow() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-start">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Workflow Configuration</h1>
-          <p className="text-slate-600">Configure phases and statuses for demands and projects</p>
-        </div>
-      </div>
+    <div className="min-h-screen bg-slate-50">
+      <TopNavigation />
+      <div className="flex">
+        <Sidebar />
+        <main className="flex-1 p-6">
+          <div className="space-y-6">
+            <div className="flex justify-between items-start">
+              <div>
+                <h1 className="text-2xl font-bold text-slate-900">Workflow Configuration</h1>
+                <p className="text-slate-600">Configure phases and statuses for demands and projects</p>
+              </div>
+            </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
@@ -404,6 +411,9 @@ export default function Workflow() {
           </div>
         </TabsContent>
       </Tabs>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

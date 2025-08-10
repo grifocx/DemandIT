@@ -10,6 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search, Shield, Crown, UserCheck, User as UserIcon, Users as UsersIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
+import { Sidebar } from "@/components/layout/Sidebar";
+import { TopNavigation } from "@/components/layout/TopNavigation";
 
 const roleIcons = {
   admin: Crown,
@@ -37,7 +39,7 @@ export default function Users() {
     queryKey: ['/api/auth/user'],
   });
 
-  const { data: searchResults, isLoading: searchLoading } = useQuery({
+  const { data: searchResults = [], isLoading: searchLoading } = useQuery({
     queryKey: ['/api/users/search', searchQuery],
     queryFn: () => searchQuery ? fetch(`/api/users/search?q=${encodeURIComponent(searchQuery)}`).then(res => res.json()) : Promise.resolve([]),
     enabled: searchQuery.length > 0,
@@ -85,7 +87,7 @@ export default function Users() {
 
   const allUsers = [
     ...(currentUser ? [currentUser] : []),
-    ...(searchResults || []),
+    ...searchResults,
   ];
 
   // Remove duplicates based on ID
@@ -94,11 +96,16 @@ export default function Users() {
   );
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">User Management</h1>
-        <p className="text-slate-600">Manage users and their roles within the system</p>
-      </div>
+    <div className="min-h-screen bg-slate-50">
+      <TopNavigation />
+      <div className="flex">
+        <Sidebar />
+        <main className="flex-1 p-6">
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900">User Management</h1>
+              <p className="text-slate-600">Manage users and their roles within the system</p>
+            </div>
 
       <Card>
         <CardHeader>
@@ -230,6 +237,9 @@ export default function Users() {
           </CardContent>
         </Card>
       )}
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

@@ -8,13 +8,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Search, History, Plus, Edit, Trash2, Eye } from "lucide-react";
 import { format } from "date-fns";
+import { Sidebar } from "@/components/layout/Sidebar";
+import { TopNavigation } from "@/components/layout/TopNavigation";
 
 export default function Audit() {
   const [searchQuery, setSearchQuery] = useState("");
   const [entityTypeFilter, setEntityTypeFilter] = useState<string>("all");
   const [changeTypeFilter, setChangeTypeFilter] = useState<string>("all");
 
-  const { data: auditLogs, isLoading } = useQuery({
+  const { data: auditLogs = [], isLoading } = useQuery({
     queryKey: ['/api/audit'],
   });
 
@@ -67,7 +69,7 @@ export default function Audit() {
   };
 
   // Filter audit logs based on search and filters
-  const filteredLogs = (auditLogs || []).filter((log: any) => {
+  const filteredLogs = auditLogs.filter((log: any) => {
     const matchesSearch = !searchQuery || 
       log.entityType.toLowerCase().includes(searchQuery.toLowerCase()) ||
       log.changeType.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -80,16 +82,21 @@ export default function Audit() {
     return matchesSearch && matchesEntityType && matchesChangeType;
   }) || [];
 
-  const entityTypes = Array.from(new Set((auditLogs || []).map((log: any) => log.entityType)));
-  const changeTypes = Array.from(new Set((auditLogs || []).map((log: any) => log.changeType)));
+  const entityTypes = Array.from(new Set(auditLogs.map((log: any) => log.entityType)));
+  const changeTypes = Array.from(new Set(auditLogs.map((log: any) => log.changeType)));
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Audit Log</h1>
-          <p className="text-slate-600">Track all changes made within the system</p>
-        </div>
+      <div className="min-h-screen bg-slate-50">
+        <TopNavigation />
+        <div className="flex">
+          <Sidebar />
+          <main className="flex-1 p-6">
+            <div className="space-y-6">
+              <div>
+                <h1 className="text-2xl font-bold text-slate-900">Audit Log</h1>
+                <p className="text-slate-600">Track all changes made within the system</p>
+              </div>
         
         <Card>
           <CardHeader>
@@ -117,16 +124,24 @@ export default function Audit() {
             </div>
           </CardContent>
         </Card>
+            </div>
+          </main>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">Audit Log</h1>
-        <p className="text-slate-600">Track all changes made within the system</p>
-      </div>
+    <div className="min-h-screen bg-slate-50">
+      <TopNavigation />
+      <div className="flex">
+        <Sidebar />
+        <main className="flex-1 p-6">
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900">Audit Log</h1>
+              <p className="text-slate-600">Track all changes made within the system</p>
+            </div>
 
       <Card>
         <CardHeader>
@@ -157,7 +172,7 @@ export default function Audit() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Types</SelectItem>
-                {entityTypes.map((type: string) => (
+                {entityTypes.map((type: any) => (
                   <SelectItem key={type} value={type}>
                     {type.charAt(0).toUpperCase() + type.slice(1)}
                   </SelectItem>
@@ -171,7 +186,7 @@ export default function Audit() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Changes</SelectItem>
-                {changeTypes.map((type: string) => (
+                {changeTypes.map((type: any) => (
                   <SelectItem key={type} value={type}>
                     {type.charAt(0).toUpperCase() + type.slice(1)}
                   </SelectItem>
@@ -185,7 +200,7 @@ export default function Audit() {
               <History className="h-12 w-12 text-slate-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-slate-900 mb-2">No audit logs found</h3>
               <p className="text-slate-600">
-                {(auditLogs || []).length === 0 
+                {auditLogs.length === 0 
                   ? "No activity has been recorded yet."
                   : "No logs match your current filters."
                 }
@@ -250,6 +265,9 @@ export default function Audit() {
           )}
         </CardContent>
       </Card>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

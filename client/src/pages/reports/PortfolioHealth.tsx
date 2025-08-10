@@ -3,23 +3,35 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle, TrendingUp, TrendingDown, Activity } from "lucide-react";
+import { Sidebar } from "@/components/layout/Sidebar";
+import { TopNavigation } from "@/components/layout/TopNavigation";
 
 export default function PortfolioHealth() {
-  const { data: portfolios, isLoading: portfoliosLoading } = useQuery({
+  const { data: portfolios = [], isLoading: portfoliosLoading } = useQuery({
     queryKey: ['/api/portfolios'],
   });
 
-  const { data: projects, isLoading: projectsLoading } = useQuery({
+  const { data: projects = [], isLoading: projectsLoading } = useQuery({
     queryKey: ['/api/projects'],
   });
 
-  const isLoading = portfoliosLoading || projectsLoading;
+  const { data: programs = [], isLoading: programsLoading } = useQuery({
+    queryKey: ['/api/programs'],
+  });
+
+  const isLoading = portfoliosLoading || projectsLoading || programsLoading;
 
   // Calculate portfolio health metrics
-  const portfolioHealthData = (portfolios || []).map((portfolio: any) => {
-    const portfolioProjects = (projects || []).filter((project: any) => 
-      project.programId && project.program?.portfolioId === portfolio.id
-    ) || [];
+  const portfolioHealthData = portfolios.map((portfolio: any) => {
+    // Get programs for this portfolio
+    const portfolioPrograms = programs.filter((program: any) => 
+      program.portfolioId === portfolio.id
+    );
+    
+    // Get projects for all programs in this portfolio
+    const portfolioProjects = projects.filter((project: any) => 
+      portfolioPrograms.some((program: any) => program.id === project.programId)
+    );
 
     const totalProjects = portfolioProjects.length;
     const activeProjects = portfolioProjects.filter((p: any) => p.status?.name === 'Active').length;
@@ -64,11 +76,16 @@ export default function PortfolioHealth() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Portfolio Health</h1>
-          <p className="text-slate-600">Monitor the overall health and performance of your portfolios</p>
-        </div>
+      <div className="min-h-screen bg-slate-50">
+        <TopNavigation />
+        <div className="flex">
+          <Sidebar />
+          <main className="flex-1 p-6">
+            <div className="space-y-6">
+              <div>
+                <h1 className="text-2xl font-bold text-slate-900">Portfolio Health</h1>
+                <p className="text-slate-600">Monitor the overall health and performance of your portfolios</p>
+              </div>
         
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {[...Array(6)].map((_, i) => (
@@ -86,17 +103,25 @@ export default function PortfolioHealth() {
               </CardContent>
             </Card>
           ))}
-        </div>
+            </div>
+          </div>
+        </main>
       </div>
+    </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">Portfolio Health</h1>
-        <p className="text-slate-600">Monitor the overall health and performance of your portfolios</p>
-      </div>
+    <div className="min-h-screen bg-slate-50">
+      <TopNavigation />
+      <div className="flex">
+        <Sidebar />
+        <main className="flex-1 p-6">
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900">Portfolio Health</h1>
+              <p className="text-slate-600">Monitor the overall health and performance of your portfolios</p>
+            </div>
 
       {portfolioHealthData.length === 0 ? (
         <Card>
@@ -169,6 +194,9 @@ export default function PortfolioHealth() {
           ))}
         </div>
       )}
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

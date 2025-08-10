@@ -5,13 +5,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import { AlertCircle, Calendar, User, Clock } from "lucide-react";
 import { format } from "date-fns";
+import { Sidebar } from "@/components/layout/Sidebar";
+import { TopNavigation } from "@/components/layout/TopNavigation";
 
 export default function ProjectStatus() {
-  const { data: projects, isLoading: projectsLoading } = useQuery({
+  const { data: projects = [], isLoading: projectsLoading } = useQuery({
     queryKey: ['/api/projects'],
   });
 
-  const { data: phases, isLoading: phasesLoading } = useQuery({
+  const { data: phases = [], isLoading: phasesLoading } = useQuery({
     queryKey: ['/api/phases'],
     queryFn: () => fetch('/api/phases?type=project').then(res => res.json()),
   });
@@ -60,63 +62,76 @@ export default function ProjectStatus() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Project Status</h1>
-          <p className="text-slate-600">Track progress and status across all active projects</p>
-        </div>
+      <div className="min-h-screen bg-slate-50">
+        <TopNavigation />
+        <div className="flex">
+          <Sidebar />
+          <main className="flex-1 p-6">
+            <div className="space-y-6">
+              <div>
+                <h1 className="text-2xl font-bold text-slate-900">Project Status</h1>
+                <p className="text-slate-600">Track progress and status across all active projects</p>
+              </div>
         
-        <div className="space-y-4">
-          {[...Array(5)].map((_, i) => (
-            <Card key={i}>
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div className="space-y-2">
-                    <Skeleton className="h-5 w-48" />
-                    <Skeleton className="h-4 w-32" />
-                  </div>
-                  <Skeleton className="h-6 w-16" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-2 w-full" />
-                  <div className="flex justify-between">
-                    <Skeleton className="h-4 w-24" />
-                    <Skeleton className="h-4 w-20" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+              <div className="space-y-4">
+                {[...Array(5)].map((_, i) => (
+                  <Card key={i}>
+                    <CardHeader>
+                      <div className="flex justify-between items-start">
+                        <div className="space-y-2">
+                          <Skeleton className="h-5 w-48" />
+                          <Skeleton className="h-4 w-32" />
+                        </div>
+                        <Skeleton className="h-6 w-16" />
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-2 w-full" />
+                        <div className="flex justify-between">
+                          <Skeleton className="h-4 w-24" />
+                          <Skeleton className="h-4 w-20" />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </main>
         </div>
       </div>
     );
   }
 
-  const projectPhases = phases?.filter((p: any) => p.type === 'project') || [];
+  const projectPhases = phases.filter((p: any) => p.type === 'project') || [];
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">Project Status</h1>
-        <p className="text-slate-600">Track progress and status across all active projects</p>
-      </div>
-
-      {!(projects || []).length ? (
-        <Card>
-          <CardContent className="flex items-center justify-center py-12">
-            <div className="text-center">
-              <AlertCircle className="h-12 w-12 text-slate-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-slate-900 mb-2">No projects found</h3>
-              <p className="text-slate-600">Create your first project to start tracking its progress.</p>
+    <div className="min-h-screen bg-slate-50">
+      <TopNavigation />
+      <div className="flex">
+        <Sidebar />
+        <main className="flex-1 p-6">
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900">Project Status</h1>
+              <p className="text-slate-600">Track progress and status across all active projects</p>
             </div>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="space-y-4">
-          {(projects || []).map((project: any) => {
+
+            {!projects.length ? (
+              <Card>
+                <CardContent className="flex items-center justify-center py-12">
+                  <div className="text-center">
+                    <AlertCircle className="h-12 w-12 text-slate-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-slate-900 mb-2">No projects found</h3>
+                    <p className="text-slate-600">Create your first project to start tracking its progress.</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-4">
+                {projects.map((project: any) => {
             const phaseProgress = getPhaseProgress(project.phase, projectPhases);
             const healthScore = calculateProjectHealth(project);
             
@@ -207,9 +222,12 @@ export default function ProjectStatus() {
                 </CardContent>
               </Card>
             );
-          })}
-        </div>
-      )}
+                })}
+              </div>
+            )}
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
