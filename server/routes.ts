@@ -410,6 +410,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User role update (Admin only)
+  app.put('/api/users/:userId/role', devAuth, async (req: any, res) => {
+    try {
+      const currentUserId = process.env.NODE_ENV === "development" ? "dev-user-123" : req.user.claims.sub;
+      const currentUser = await storage.getUser(currentUserId);
+      
+      // Check if current user is admin
+      if (currentUser.role !== 'admin') {
+        return res.status(403).json({ message: "Only admins can update user roles" });
+      }
+
+      const { userId } = req.params;
+      const { role } = req.body;
+
+      // Validate role
+      const validRoles = ['admin', 'portfolio_manager', 'program_manager', 'project_manager', 'contributor'];
+      if (!validRoles.includes(role)) {
+        return res.status(400).json({ message: "Invalid role" });
+      }
+
+      // Update user role
+      const updatedUser = await storage.updateUser(userId, { role });
+      
+      // Create audit log
+      await storage.createAuditLog({
+        entityType: 'user',
+        entityId: userId,
+        changeType: 'updated',
+        changedBy: currentUserId,
+        details: { roleUpdate: { newRole: role } }
+      });
+      
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error updating user role:", error);
+      res.status(500).json({ message: "Failed to update user role" });
+    }
+  });
+
   // Seed data initialization
   app.post('/api/seed-data', devAuth, async (req: any, res) => {
     try {

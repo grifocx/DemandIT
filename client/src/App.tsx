@@ -11,6 +11,11 @@ import Portfolios from "@/pages/Portfolios";
 import Programs from "@/pages/Programs";
 import Demands from "@/pages/Demands";
 import Projects from "@/pages/Projects";
+import PortfolioHealth from "@/pages/reports/PortfolioHealth";
+import ProjectStatus from "@/pages/reports/ProjectStatus";
+import Users from "@/pages/admin/Users";
+import Workflow from "@/pages/admin/Workflow";
+import Audit from "@/pages/admin/Audit";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -26,6 +31,11 @@ function Router() {
           <Route path="/programs" component={Programs} />
           <Route path="/demands" component={Demands} />
           <Route path="/projects" component={Projects} />
+          <Route path="/reports/portfolio-health" component={PortfolioHealth} />
+          <Route path="/reports/project-status" component={ProjectStatus} />
+          <Route path="/admin/users" component={Users} />
+          <Route path="/admin/workflow" component={Workflow} />
+          <Route path="/admin/audit" component={Audit} />
         </>
       )}
       <Route component={NotFound} />
