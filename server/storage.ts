@@ -4,6 +4,8 @@ import {
   programs,
   demands,
   projects,
+  products,
+  projectProducts,
   phases,
   statuses,
   assignments,
@@ -18,6 +20,10 @@ import {
   type InsertDemand,
   type Project,
   type InsertProject,
+  type Product,
+  type InsertProduct,
+  type ProjectProduct,
+  type InsertProjectProduct,
   type Phase,
   type InsertPhase,
   type Status,
@@ -64,6 +70,18 @@ export interface IStorage {
   createProject(project: InsertProject): Promise<Project>;
   updateProject(id: string, project: Partial<InsertProject>): Promise<Project>;
   deleteProject(id: string): Promise<void>;
+
+  // Product operations
+  getProducts(programId?: string): Promise<Product[]>;
+  getProduct(id: string): Promise<Product | undefined>;
+  createProduct(product: InsertProduct): Promise<Product>;
+  updateProduct(id: string, product: Partial<InsertProduct>): Promise<Product>;
+  deleteProduct(id: string): Promise<void>;
+
+  // Project-Product relationship operations
+  getProjectProducts(projectId?: string, productId?: string): Promise<ProjectProduct[]>;
+  addProjectToProduct(projectProduct: InsertProjectProduct): Promise<ProjectProduct>;
+  removeProjectFromProduct(id: string): Promise<void>;
 
   // Phase operations
   getPhases(type?: string): Promise<Phase[]>;
@@ -256,6 +274,59 @@ export class DatabaseStorage implements IStorage {
 
   async deleteProject(id: string): Promise<void> {
     await db.delete(projects).where(eq(projects.id, id));
+  }
+
+  // Product operations
+  async getProducts(programId?: string): Promise<Product[]> {
+    if (programId) {
+      return await db.select().from(products).where(eq(products.programId, programId)).orderBy(asc(products.name));
+    }
+    return await db.select().from(products).orderBy(asc(products.name));
+  }
+
+  async getProduct(id: string): Promise<Product | undefined> {
+    const [product] = await db.select().from(products).where(eq(products.id, id));
+    return product;
+  }
+
+  async createProduct(product: InsertProduct): Promise<Product> {
+    const [newProduct] = await db.insert(products).values(product).returning();
+    return newProduct;
+  }
+
+  async updateProduct(id: string, product: Partial<InsertProduct>): Promise<Product> {
+    const [updatedProduct] = await db
+      .update(products)
+      .set({ ...product, updatedAt: new Date() })
+      .where(eq(products.id, id))
+      .returning();
+    return updatedProduct;
+  }
+
+  async deleteProduct(id: string): Promise<void> {
+    await db.delete(products).where(eq(products.id, id));
+  }
+
+  // Project-Product relationship operations
+  async getProjectProducts(projectId?: string, productId?: string): Promise<ProjectProduct[]> {
+    if (projectId && productId) {
+      return await db.select().from(projectProducts)
+        .where(and(eq(projectProducts.projectId, projectId), eq(projectProducts.productId, productId)));
+    } else if (projectId) {
+      return await db.select().from(projectProducts).where(eq(projectProducts.projectId, projectId));
+    } else if (productId) {
+      return await db.select().from(projectProducts).where(eq(projectProducts.productId, productId));
+    }
+    return await db.select().from(projectProducts);
+  }
+
+  async addProjectToProduct(projectProduct: InsertProjectProduct): Promise<ProjectProduct> {
+    const [newProjectProduct] = await db.insert(projectProducts).values(projectProduct).returning();
+    return newProjectProduct;
+  }
+
+  async removeProjectFromProduct(id: string): Promise<void> {
+    await db.delete(projectProducts).where(eq(projectProducts.id, id));
   }
 
   // Phase operations

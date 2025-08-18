@@ -7,6 +7,7 @@ import {
   Layers,
   Lightbulb,
   ChartScatter,
+  Package,
   BarChart3,
   Clock,
   Users,
@@ -48,6 +49,12 @@ const menuItems = [
     label: "Projects",
     icon: ChartScatter,
     href: "/projects",
+    roles: ["admin", "portfolio_manager", "program_manager", "project_manager", "contributor"],
+  },
+  {
+    label: "Products",
+    icon: Package,
+    href: "/products",
     roles: ["admin", "portfolio_manager", "program_manager", "project_manager", "contributor"],
   },
   {

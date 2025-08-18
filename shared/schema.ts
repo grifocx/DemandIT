@@ -112,6 +112,30 @@ export const projects = pgTable("projects", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+export const products = pgTable("products", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  programId: varchar("program_id").notNull().references(() => programs.id),
+  ownerId: varchar("owner_id").notNull().references(() => users.id), // Product Owner
+  status: varchar("status").notNull().default("in_development"), // in_development, active, deprecated, sunset
+  version: varchar("version").default("1.0.0"),
+  launchDate: timestamp("launch_date"),
+  usageMetrics: jsonb("usage_metrics"), // Store usage stats, revenue impact, etc.
+  businessValue: text("business_value"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Junction table for many-to-many relationship between projects and products
+export const projectProducts = pgTable("project_products", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  projectId: varchar("project_id").notNull().references(() => projects.id),
+  productId: varchar("product_id").notNull().references(() => products.id),
+  contributionType: varchar("contribution_type").notNull().default("development"), // development, enhancement, maintenance
+  assignedAt: timestamp("assigned_at").defaultNow(),
+});
+
 export const assignments = pgTable("assignments", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   projectId: varchar("project_id").notNull().references(() => projects.id),
@@ -122,7 +146,7 @@ export const assignments = pgTable("assignments", {
 
 export const auditLog = pgTable("audit_log", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  entityType: varchar("entity_type").notNull(), // portfolio, program, demand, project
+  entityType: varchar("entity_type").notNull(), // portfolio, program, demand, project, product
   entityId: varchar("entity_id").notNull(),
   changeType: varchar("change_type").notNull(), // created, updated, deleted, status_changed
   changedBy: varchar("changed_by").notNull().references(() => users.id),
@@ -137,6 +161,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   demands: many(demands),
   projects: many(projects),
   managedProjects: many(projects),
+  products: many(products),
   assignments: many(assignments),
   auditLogs: many(auditLog),
 }));
@@ -160,6 +185,7 @@ export const programsRelations = relations(programs, ({ one, many }) => ({
   }),
   demands: many(demands),
   projects: many(projects),
+  products: many(products),
 }));
 
 export const demandsRelations = relations(demands, ({ one, many }) => ({
@@ -208,6 +234,30 @@ export const projectsRelations = relations(projects, ({ one, many }) => ({
     references: [statuses.id],
   }),
   assignments: many(assignments),
+  projectProducts: many(projectProducts),
+}));
+
+export const productsRelations = relations(products, ({ one, many }) => ({
+  program: one(programs, {
+    fields: [products.programId],
+    references: [programs.id],
+  }),
+  owner: one(users, {
+    fields: [products.ownerId],
+    references: [users.id],
+  }),
+  projectProducts: many(projectProducts),
+}));
+
+export const projectProductsRelations = relations(projectProducts, ({ one }) => ({
+  project: one(projects, {
+    fields: [projectProducts.projectId],
+    references: [projects.id],
+  }),
+  product: one(products, {
+    fields: [projectProducts.productId],
+    references: [products.id],
+  }),
 }));
 
 export const assignmentsRelations = relations(assignments, ({ one }) => ({
@@ -266,6 +316,12 @@ export type InsertAssignment = typeof assignments.$inferInsert;
 export type AuditLog = typeof auditLog.$inferSelect;
 export type InsertAuditLog = typeof auditLog.$inferInsert;
 
+export type Product = typeof products.$inferSelect;
+export type InsertProduct = typeof products.$inferInsert;
+
+export type ProjectProduct = typeof projectProducts.$inferSelect;
+export type InsertProjectProduct = typeof projectProducts.$inferInsert;
+
 // Schemas
 export const insertPortfolioSchema = createInsertSchema(portfolios).omit({
   id: true,
@@ -300,6 +356,17 @@ export const insertStatusSchema = createInsertSchema(statuses).omit({
 });
 
 export const insertAssignmentSchema = createInsertSchema(assignments).omit({
+  id: true,
+  assignedAt: true,
+});
+
+export const insertProductSchema = createInsertSchema(products).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertProjectProductSchema = createInsertSchema(projectProducts).omit({
   id: true,
   assignedAt: true,
 });

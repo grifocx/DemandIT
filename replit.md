@@ -29,9 +29,11 @@ Product branding: "Demand-IT" (updated January 2025)
 ## Data Architecture
 The system implements a hierarchical data model:
 - **Portfolios** contain multiple Programs
-- **Programs** contain both Demands and Projects  
+- **Programs** contain Demands, Projects, and Products
 - **Demands** represent ideas/requests that can be converted to Projects
 - **Projects** are active initiatives with phases, statuses, and assignments
+- **Products** are deliverables/outcomes that result from projects, with their own lifecycle and business metrics
+- **Project-Product Relationships** track which projects contribute to which products (many-to-many)
 - **Users** have role-based permissions (admin, portfolio_manager, program_manager, project_manager, contributor)
 - **Audit Log** tracks all changes across entities for compliance and history
 
@@ -95,6 +97,15 @@ A comprehensive test plan is available in `TEST_PLAN.md` covering all current fu
 The test plan includes 12 major test categories with detailed test cases, expected results, and success criteria for ensuring all features work correctly before deployment or major releases.
 
 # Recent Changes
+
+## August 2025
+- **Products Feature**: Added comprehensive products management functionality to the application
+  - Created products database table with relationships to programs and users
+  - Implemented full CRUD API endpoints for product management
+  - Built Products frontend page with data table, create/edit modals
+  - Added Products to main navigation menu
+  - Established project-product relationship tracking
+  - Products are properly nested under programs in the hierarchy: Portfolios → Programs → Products & Projects
 
 ## January 2025
 - **Branding Update**: Changed product name from "IT Portfolio Manager" to "Demand-IT" across all UI components, navigation, landing page, and documentation

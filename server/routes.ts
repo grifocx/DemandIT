@@ -7,6 +7,8 @@ import {
   insertProgramSchema,
   insertDemandSchema,
   insertProjectSchema,
+  insertProductSchema,
+  insertProjectProductSchema,
   insertPhaseSchema,
   insertStatusSchema,
   insertAssignmentSchema 
@@ -416,8 +418,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const currentUserId = process.env.NODE_ENV === "development" ? "dev-user-123" : req.user.claims.sub;
       const currentUser = await storage.getUser(currentUserId);
       
-      // Check if current user is admin
-      if (currentUser.role !== 'admin') {
+      // Check if current user exists and is admin
+      if (!currentUser || currentUser.role !== 'admin') {
         return res.status(403).json({ message: "Only admins can update user roles" });
       }
 
@@ -446,6 +448,142 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating user role:", error);
       res.status(500).json({ message: "Failed to update user role" });
+    }
+  });
+
+  // Product routes
+  app.get('/api/products', devAuth, async (req, res) => {
+    try {
+      const programId = req.query.programId as string;
+      const products = await storage.getProducts(programId);
+      res.json(products);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      res.status(500).json({ message: "Failed to fetch products" });
+    }
+  });
+
+  app.get('/api/products/:id', devAuth, async (req, res) => {
+    try {
+      const product = await storage.getProduct(req.params.id);
+      if (!product) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+      res.json(product);
+    } catch (error) {
+      console.error("Error fetching product:", error);
+      res.status(500).json({ message: "Failed to fetch product" });
+    }
+  });
+
+  app.post('/api/products', devAuth, async (req: any, res) => {
+    try {
+      const userId = process.env.NODE_ENV === 'development' ? "dev-user-123" : req.user.claims.sub;
+      const productData = insertProductSchema.parse({
+        ...req.body,
+        ownerId: userId
+      });
+      const product = await storage.createProduct(productData);
+      
+      // Create audit log
+      await storage.createAuditLog({
+        entityType: 'product',
+        entityId: product.id,
+        changeType: 'created',
+        changedBy: userId,
+        details: { product }
+      });
+      
+      res.status(201).json(product);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      console.error("Error creating product:", error);
+      res.status(500).json({ message: "Failed to create product" });
+    }
+  });
+
+  app.put('/api/products/:id', devAuth, async (req: any, res) => {
+    try {
+      const userId = process.env.NODE_ENV === "development" ? "dev-user-123" : req.user.claims.sub;
+      const productData = insertProductSchema.partial().parse(req.body);
+      const product = await storage.updateProduct(req.params.id, productData);
+      
+      // Create audit log
+      await storage.createAuditLog({
+        entityType: 'product',
+        entityId: product.id,
+        changeType: 'updated',
+        changedBy: userId,
+        details: { changes: productData }
+      });
+      
+      res.json(product);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      console.error("Error updating product:", error);
+      res.status(500).json({ message: "Failed to update product" });
+    }
+  });
+
+  app.delete('/api/products/:id', devAuth, async (req: any, res) => {
+    try {
+      const userId = process.env.NODE_ENV === "development" ? "dev-user-123" : req.user.claims.sub;
+      await storage.deleteProduct(req.params.id);
+      
+      // Create audit log
+      await storage.createAuditLog({
+        entityType: 'product',
+        entityId: req.params.id,
+        changeType: 'deleted',
+        changedBy: userId,
+        details: {}
+      });
+      
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      res.status(500).json({ message: "Failed to delete product" });
+    }
+  });
+
+  // Project-Product relationship routes
+  app.get('/api/project-products', devAuth, async (req, res) => {
+    try {
+      const projectId = req.query.projectId as string;
+      const productId = req.query.productId as string;
+      const projectProducts = await storage.getProjectProducts(projectId, productId);
+      res.json(projectProducts);
+    } catch (error) {
+      console.error("Error fetching project-product relationships:", error);
+      res.status(500).json({ message: "Failed to fetch project-product relationships" });
+    }
+  });
+
+  app.post('/api/project-products', devAuth, async (req: any, res) => {
+    try {
+      const projectProductData = insertProjectProductSchema.parse(req.body);
+      const projectProduct = await storage.addProjectToProduct(projectProductData);
+      res.status(201).json(projectProduct);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      console.error("Error adding project to product:", error);
+      res.status(500).json({ message: "Failed to add project to product" });
+    }
+  });
+
+  app.delete('/api/project-products/:id', devAuth, async (req, res) => {
+    try {
+      await storage.removeProjectFromProduct(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error removing project from product:", error);
+      res.status(500).json({ message: "Failed to remove project from product" });
     }
   });
 
@@ -517,6 +655,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
         } catch (error) {
           // Ignore if already exists
         }
+      }
+
+      // Add some sample products
+      try {
+        const sampleProducts = [
+          {
+            name: "Customer Experience Portal",
+            description: "Self-service portal for customer account management and omnichannel support",
+            programId: "customer-experience-prog",
+            ownerId: "dev-user-123",
+            status: "active",
+            version: "2.1.0",
+            launchDate: new Date('2023-03-15').toISOString(),
+            businessValue: "Reduces customer service calls by 40% and improves customer satisfaction",
+          },
+          {
+            name: "RPA Automation Platform",
+            description: "Robotic Process Automation platform for business process optimization",
+            programId: "process-automation-prog",
+            ownerId: "dev-user-123",
+            status: "in_development",
+            version: "1.0.0",
+            businessValue: "Expected to automate 15 critical business processes and save 200 hours/month",
+          },
+          {
+            name: "Cloud Migration Dashboard",
+            description: "Monitoring and management dashboard for AWS cloud infrastructure",
+            programId: "cloud-migration-prog", 
+            ownerId: "dev-user-123",
+            status: "active",
+            version: "1.5.2",
+            launchDate: new Date('2024-01-10').toISOString(),
+            businessValue: "Provides real-time cloud infrastructure insights, reducing monitoring time by 60%",
+          },
+          {
+            name: "Zero-Trust Security Gateway",
+            description: "Advanced security platform implementing zero-trust network architecture",
+            programId: "security-modernization-prog",
+            ownerId: "dev-user-123", 
+            status: "active",
+            version: "3.2.1",
+            launchDate: new Date('2023-08-01').toISOString(),
+            businessValue: "Enhances security posture and reduces security incidents by 70%",
+          },
+        ];
+
+        for (const product of sampleProducts) {
+          try {
+            await storage.createProduct(product);
+          } catch (error) {
+            // Ignore if already exists
+          }
+        }
+      } catch (error) {
+        console.log("Sample products may already exist");
       }
 
       res.json({ message: "Seed data initialized successfully" });

@@ -11,6 +11,7 @@ import Portfolios from "@/pages/Portfolios";
 import Programs from "@/pages/Programs";
 import Demands from "@/pages/Demands";
 import Projects from "@/pages/Projects";
+import Products from "@/pages/Products";
 import PortfolioHealth from "@/pages/reports/PortfolioHealth";
 import ProjectStatus from "@/pages/reports/ProjectStatus";
 import Users from "@/pages/admin/Users";
@@ -31,6 +32,7 @@ function Router() {
           <Route path="/programs" component={Programs} />
           <Route path="/demands" component={Demands} />
           <Route path="/projects" component={Projects} />
+          <Route path="/products" component={Products} />
           <Route path="/reports/portfolio-health" component={PortfolioHealth} />
           <Route path="/reports/project-status" component={ProjectStatus} />
           <Route path="/admin/users" component={Users} />
