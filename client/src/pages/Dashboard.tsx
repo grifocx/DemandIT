@@ -232,8 +232,8 @@ export default function Dashboard() {
       <div className="flex h-screen pt-16">
         <Sidebar />
         
-        <main className="flex-1 overflow-y-auto">
-          <div className="p-6">
+        <main className="flex-1 overflow-y-auto min-w-0">
+          <div className="p-4 sm:p-6">
             {/* Dashboard Header */}
             <div className="mb-8">
               <h1 className="text-2xl font-bold text-slate-900" data-testid="text-dashboard-title">
@@ -243,7 +243,7 @@ export default function Dashboard() {
             </div>
 
             {/* Key Metrics Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
               <MetricsCard
                 title="Active Projects"
                 value={metrics?.activeProjects || 0}
@@ -298,9 +298,9 @@ export default function Dashboard() {
             </div>
 
             {/* Portfolio Overview Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
               {/* Portfolio Health */}
-              <div className="lg:col-span-2 bg-white rounded-lg border border-slate-200 p-6">
+              <div className="lg:col-span-2 bg-white rounded-lg border border-slate-200 p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-lg font-semibold text-slate-900">Portfolio Health Overview</h3>
                   <div className="flex space-x-2">
@@ -337,12 +337,12 @@ export default function Dashboard() {
 
             {/* Active Projects Table */}
             <div className="bg-white rounded-lg border border-slate-200">
-              <div className="px-6 py-4 border-b border-slate-200">
+              <div className="px-4 sm:px-6 py-4 border-b border-slate-200">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-semibold text-slate-900">Active Projects</h3>
-                  <Button className="bg-blue-600 hover:bg-blue-700" data-testid="button-new-project">
-                    <Plus className="h-4 w-4 mr-2" />
-                    New Project
+                  <Button className="bg-blue-600 hover:bg-blue-700" size="sm" data-testid="button-new-project">
+                    <Plus className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">New Project</span>
                   </Button>
                 </div>
               </div>

@@ -43,8 +43,8 @@ export default function Products() {
       <div className="flex h-screen pt-16">
         <Sidebar />
         
-        <main className="flex-1 overflow-y-auto">
-          <div className="p-6">
+        <main className="flex-1 overflow-y-auto min-w-0">
+          <div className="p-4 sm:p-6">
             <ProductTable />
           </div>
         </main>
