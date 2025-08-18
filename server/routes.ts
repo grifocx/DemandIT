@@ -667,7 +667,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             ownerId: "dev-user-123",
             status: "active",
             version: "2.1.0",
-            launchDate: new Date('2023-03-15').toISOString(),
+            launchDate: new Date('2023-03-15'),
             businessValue: "Reduces customer service calls by 40% and improves customer satisfaction",
           },
           {
@@ -686,7 +686,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             ownerId: "dev-user-123",
             status: "active",
             version: "1.5.2",
-            launchDate: new Date('2024-01-10').toISOString(),
+            launchDate: new Date('2024-01-10'),
             businessValue: "Provides real-time cloud infrastructure insights, reducing monitoring time by 60%",
           },
           {
@@ -696,7 +696,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             ownerId: "dev-user-123", 
             status: "active",
             version: "3.2.1",
-            launchDate: new Date('2023-08-01').toISOString(),
+            launchDate: new Date('2023-08-01'),
             businessValue: "Enhances security posture and reduces security incidents by 70%",
           },
         ];
